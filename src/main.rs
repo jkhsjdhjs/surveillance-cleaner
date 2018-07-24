@@ -38,7 +38,7 @@ where
             .datetime_from_str(filename_str, "%Y-%m-%d_%H-%M-%S")
             .unwrap())
         .num_days();
-    if age.is_positive() && is_old_age(age.abs() as u16) {
+    if age.is_positive() && is_old_age(age as u16) {
         fs::remove_file(f.path())?;
         return Ok(true);
     }
@@ -50,7 +50,7 @@ fn main() -> Result<()> {
     let deleted_count = fs::read_dir(cli_opts.dir.clone())?
         .filter_map(|f| f.map_err(|e| eprintln!("Error reading file: {}", e)).ok())
         .map(|f| delete_if_old_age(f, |age| age >= cli_opts.age))
-        .filter_map(Result::ok)
+        .filter_map(|f| f.map_err(|e| eprintln!("{}", e)).ok())
         .filter(|r| *r)
         .count();
     println!("Deleted {} files!", deleted_count);
