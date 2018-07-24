@@ -1,0 +1,8 @@
+[package]
+name = "surveillance-cleaner"
+version = "0.1.0"
+authors = ["jkhsjdhjs <leon.moeller@yahoo.de>"]
+
+[dependencies]
+chrono = "*"
+structopt = "*"
