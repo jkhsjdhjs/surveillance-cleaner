@@ -1,0 +1,5 @@
+[Unit]
+Description=Cleans old surveillance videos
+
+[Service]
+ExecStart=%h/surveillance-cleaner/target/release/surveillance-cleaner %h/ipcam
