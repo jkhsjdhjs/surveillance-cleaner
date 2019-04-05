@@ -4,7 +4,6 @@ extern crate structopt;
 
 use chrono::{TimeZone, Utc};
 use std::fs;
-use std::io::{Error, ErrorKind, Result};
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
@@ -18,36 +17,32 @@ struct CliOpts {
     age: u16,
 }
 
-fn delete_if_old_age<C>(f: fs::DirEntry, is_old_age: C) -> Result<bool>
+fn delete_if_old_age<C>(f: fs::DirEntry, is_old_age: C) -> Result<bool, String>
 where
     C: Fn(u16) -> bool,
 {
-    let filename = f.file_name();
-    let filename_str = filename
-        .to_str()
-        .ok_or(Error::new(
-            ErrorKind::Other,
-            "Error converting filename to &str",
-        ))?
+    let filename_borrowed = f.file_name();
+    let filename = filename_borrowed.to_str().ok_or("Error converting a filename to &str")?;
+    let filename_without_ext = filename
         .split(".")
         .next()
-        .ok_or(Error::new(ErrorKind::Other, "Error splitting filename"))?;
-    let remove_unwrap = 0;
+        .ok_or(format!("Error splitting filename: {}", filename))?;
     let age = (Utc::now()
         - Utc
-            .datetime_from_str(filename_str, "%Y-%m-%d_%H-%M-%S")
-            .unwrap())
+            .datetime_from_str(filename_without_ext, "%Y-%m-%d_%H-%M-%S")
+        .or(Err(format!("Failed to parse date from filename: {}", filename)))?)
         .num_days();
     if age.is_positive() && is_old_age(age as u16) {
-        fs::remove_file(f.path())?;
+        fs::remove_file(f.path()).or(Err("error removing file"))?;
         return Ok(true);
     }
     Ok(false)
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Box<std::error::Error>> {
     let cli_opts = CliOpts::from_args();
-    let deleted_count = fs::read_dir(cli_opts.dir.clone())?
+    let deleted_count = fs::read_dir(cli_opts.dir.clone())
+        .expect("Failed to read specified directory!")
         .filter_map(|f| f.map_err(|e| eprintln!("Error reading file: {}", e)).ok())
         .map(|f| delete_if_old_age(f, |age| age >= cli_opts.age))
         .filter_map(|f| f.map_err(|e| eprintln!("{}", e)).ok())
