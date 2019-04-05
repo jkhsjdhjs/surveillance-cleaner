@@ -1,5 +1,4 @@
 extern crate chrono;
-#[macro_use]
 extern crate structopt;
 
 use chrono::{TimeZone, Utc};
@@ -22,7 +21,9 @@ where
     C: Fn(u16) -> bool,
 {
     let filename_borrowed = f.file_name();
-    let filename = filename_borrowed.to_str().ok_or("Error converting a filename to &str")?;
+    let filename = filename_borrowed
+        .to_str()
+        .ok_or("Error converting a filename to &str")?;
     let filename_without_ext = filename
         .split(".")
         .next()
@@ -30,8 +31,11 @@ where
     let age = (Utc::now()
         - Utc
             .datetime_from_str(filename_without_ext, "%Y-%m-%d_%H-%M-%S")
-        .or(Err(format!("Failed to parse date from filename: {}", filename)))?)
-        .num_days();
+            .or(Err(format!(
+                "Failed to parse date from filename: {}",
+                filename
+            )))?)
+    .num_days();
     if age.is_positive() && is_old_age(age as u16) {
         fs::remove_file(f.path()).or(Err("error removing file"))?;
         return Ok(true);
