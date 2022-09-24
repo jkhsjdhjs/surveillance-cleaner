@@ -43,7 +43,7 @@ where
     Ok(false)
 }
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli_opts = CliOpts::from_args();
     let deleted_count = fs::read_dir(cli_opts.dir.clone())
         .expect("Failed to read specified directory!")
