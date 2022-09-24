@@ -4,5 +4,5 @@ version = "0.1.0"
 authors = ["jkhsjdhjs <leon.moeller@yahoo.de>"]
 
 [dependencies]
-chrono = "*"
-structopt = "*"
+chrono = "0.4"
+clap = { version = "3", features = ["derive"] }

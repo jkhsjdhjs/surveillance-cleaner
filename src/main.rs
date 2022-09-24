@@ -1,18 +1,18 @@
 extern crate chrono;
-extern crate structopt;
+extern crate clap;
 
 use chrono::{TimeZone, Utc};
 use std::fs;
-use structopt::StructOpt;
+use clap::Parser;
 
-#[derive(StructOpt)]
+#[derive(Parser)]
 struct CliOpts {
     /// The directory to keep clean
     #[structopt(name = "DIR", parse(from_os_str))]
     dir: std::path::PathBuf,
 
     /// Delete files older than <age> days
-    #[structopt(short = "a", long = "age", default_value = "30")]
+    #[structopt(short = 'a', long = "age", default_value = "30")]
     age: u16,
 }
 
